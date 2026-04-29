@@ -1,0 +1,79 @@
+ASMI / ERPNext Change Log
+Timestamp: 2026-03-22 11:14:55 IST
+Host Timezone: IST (+0530)
+
+Scope
+- ASMI Quotation form/grid behavior fixes
+- Row alignment stabilization
+- Description field behavior updates
+- Searchability enhancements for Quotation No. and Description
+- Global Search enablement for ASMI Quotation
+
+Changes Performed
+1) ERPNext instance bring-up and verification
+- Bench path verified: /home/jo/frappe-bench
+- Confirmed ERPNext/Frappe versions in bench
+- Started bench services and validated HTTP 200 on localhost
+
+2) Description inline editing behavior
+- Investigated popup Edit Row behavior on ASMI Quotation items table
+- Updated ASMI Quotation Item grid metadata (columns) to explicit layout
+- Migrated site metadata for both sites (site1.local and vanilla.local)
+- Confirmed active localhost site is vanilla.local (default_site)
+
+3) Row alignment issue (row 1 shifting)
+- Removed risky runtime JS overrides that affected grid internals
+- Added scoped CSS override for ASMI items grid row/cell heights
+- Result: user confirmed alignment fixed
+
+4) Add-row / row options regressions
+- Reverted custom JS hooks that interfered with add-row and row options
+- Rebuilt assets and cleared caches to restore standard grid behavior
+
+5) Description field behavior
+- Changed ASMI Quotation Item.description fieldtype to Small Text
+  File: apps/asmi/asmi/asmi/doctype/asmi_quotation_item/asmi_quotation_item.json
+
+6) Search improvements requested
+- Added parent index field for item descriptions:
+  - fieldname: description_index
+  - hidden, read_only
+- Auto-populate description_index in controller from child row descriptions
+  File: apps/asmi/asmi/asmi/doctype/asmi_quotation/asmi_quotation.py
+- Set DocType search_fields to:
+  quotation_no,customer_name,description_index
+- Enabled in_global_search on:
+  - quotation_no
+  - description_index
+- Enabled in_standard_filter on description_index and label set to "Description"
+  File: apps/asmi/asmi/asmi/doctype/asmi_quotation/asmi_quotation.json
+
+7) Global Search enablement fix
+- Found ASMI Quotation missing from tabGlobal Search DocType allow-list
+- Inserted ASMI Quotation into allowed_in_global_search for both sites
+- Rebuilt global search index for both sites
+- Verified indexed record exists for:
+  9003/ASMI/SG/2026
+  with description content in __global_search
+
+Commands/Operations Repeated As Needed
+- bench --site <site> migrate
+- bench build --app asmi
+- bench --site <site> clear-cache
+- bench --site <site> clear-website-cache
+- bench --site <site> rebuild-global-search
+
+Files Modified During Session
+- /home/jo/frappe-bench/apps/asmi/asmi/asmi/doctype/asmi_quotation/asmi_quotation.js
+- /home/jo/frappe-bench/apps/asmi/asmi/asmi/doctype/asmi_quotation_item/asmi_quotation_item.json
+- /home/jo/frappe-bench/apps/asmi/asmi/asmi/doctype/asmi_quotation/asmi_quotation.json
+- /home/jo/frappe-bench/apps/asmi/asmi/asmi/doctype/asmi_quotation/asmi_quotation.py
+- /home/jo/frappe-bench/apps/asmi/asmi/hooks.py
+- /home/jo/frappe-bench/apps/asmi/asmi/public/css/asmi_grid_fix.css
+
+Current Expected State
+- ASMI Quotation grid alignment is fixed
+- Description is available in list filters as "Description"
+- Global Search can return ASMI Quotation by quotation number and description text
+- Quotation No. format like 9003/ASMI/SG/2026 is indexed
+

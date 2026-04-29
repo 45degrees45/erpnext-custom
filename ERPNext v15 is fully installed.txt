@@ -1,0 +1,43 @@
+● ERPNext v15 is fully installed and running.                                   
+                                                                                
+  ---                                                                           
+  Summary                                                                       
+                                                                                
+  ┌────────────────────┬────────┬─────────────────────────────┐                 
+  │     Component      │ Status │           Details           │                 
+  ├────────────────────┼────────┼─────────────────────────────┤                 
+  │ Ubuntu 24.04       │ ✓      │ Base OS                     │                 
+  ├────────────────────┼────────┼─────────────────────────────┤                 
+  │ Python 3.12        │ ✓      │ Meets 3.11+ requirement     │                 
+  ├────────────────────┼────────┼─────────────────────────────┤                 
+  │ Node.js 22 + yarn  │ ✓      │ Meets 18+ requirement       │                 
+  ├────────────────────┼────────┼─────────────────────────────┤                 
+  │ MariaDB 10.11      │ ✓      │ Running, utf8mb4 configured │                 
+  ├────────────────────┼────────┼─────────────────────────────┤                 
+  │ Redis 7.0          │ ✓      │ Running                     │
+  ├────────────────────┼────────┼─────────────────────────────┤
+  │ wkhtmltopdf 0.12.6 │ ✓      │ Installed                   │
+  ├────────────────────┼────────┼─────────────────────────────┤
+  │ bench 5.29.1       │ ✓      │ Installed                   │
+  ├────────────────────┼────────┼─────────────────────────────┤
+  │ Frappe v15         │ ✓      │ ~/frappe-bench              │
+  ├────────────────────┼────────┼─────────────────────────────┤
+  │ ERPNext v15        │ ✓      │ Installed on site1.local    │
+  ├────────────────────┼────────┼─────────────────────────────┤
+  │ Dev server         │ ✓      │ Running on port 8000        │
+  └────────────────────┴────────┴─────────────────────────────┘
+
+  Access ERPNext
+
+  Open your browser:
+  http://site1.local:8000
+  - Username: Administrator
+  - Password: admin
+
+  To restart bench after reboot
+
+  cd ~/frappe-bench && bench start
+
+  The bench process is running in the background (log: /tmp/frappe-bench.log).
+  Do you want me to also set up nginx + supervisor for production mode?
+

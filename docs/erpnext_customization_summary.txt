@@ -1,0 +1,209 @@
+ERPNext Customization Summary — What Was Done by Claude Code
+=============================================================
+Generated: 2026-03-14
+Site: site1.local | Frappe v15.102.0 | ERPNext v15.101.0
+
+===========================================================
+APPS CREATED
+===========================================================
+
+1. fabrication_erp          — FULLY DONE (production-ready, no git repo)
+2. quotation_enhancer       — FULLY DONE (no git repo)
+3. custom_jobs              — SCAFFOLDED, INCOMPLETE (git repo, develop branch)
+4. quotation_app            — SCAFFOLDED, INCOMPLETE (git repo, develop branch)
+
+
+===========================================================
+APP 1: fabrication_erp
+===========================================================
+Purpose: Custom Quotation workflow for a Fabrication company
+
+DONE:
+  [x] Custom DocTypes created:
+        - Fab Quotation      (with fields: DO No, Enquiry No, Drawing No,
+                              Prospective, Fab Subject, Note, Contact fields,
+                              Telephone, Fax, Mobile, Email)
+        - Fab Quotation Item (child table)
+
+  [x] Custom Fields on standard Quotation doctype (via fixtures):
+        - delivery_terms, validity_terms, note, enquiry_no, drawing_no,
+          do_no, fab_subject, prospective, telephone_no, fax, contact_person
+
+  [x] Property Setters (UI customizations on Quotation):
+        - Hid: item_code, brand, image, item_tax_template, discount_percentage,
+               discount_amount, pricing_rules, warehouse, projected_qty,
+               actual_qty from Quotation Item grid
+        - Set item_name, description, uom visible in list view
+        - Added customer_name, status, transaction_date as standard filters
+
+  [x] Print Format: "Fabrication Quotation" (Jinja2 HTML)
+        - Header: Quotation No, Date, Customer, Contact, Telephone, Fax,
+                  Mobile, Email, Enquiry No, Drawing No, DO No, Note, Subject
+        - Items table: #, Description, Unit, Quantity, Price, Amount
+        - Footer: Total, Discount, Net Amount, Delivery Terms, Validity, Payment Terms
+
+  [x] JS (quotation_fab.js) injected into Quotation form:
+        - Auto-fill contact details (Phone, Mobile, Email) when Customer selected
+        - Quick entry: allow typing new customer name directly (no dropdown-only)
+        - Auto-populate saved defaults on new Quotation:
+            delivery_terms, validity_terms, note, payment_terms
+        - Save defaults after each save (per-user persistence)
+        - Line-item amount = Qty × Rate (live recalculation)
+        - Net Amount = Total − Discount (live recalculation)
+        - fab_desc field: type description → maps to FABRICATION item_code silently
+        - FABRICATION generic item auto-created if missing (edge case handling)
+
+  [x] CSS (quotation_fab.css): Global desk styling
+
+  [x] API endpoints (api.py):
+        - save_quotation_defaults(): persists 4 defaults per user
+        - get_quotation_defaults(): retrieves with fallback values
+
+  [x] Global search fields on Quotation:
+        customer_name, enquiry_no, drawing_no, do_no, fab_subject, note
+
+  [x] Naming series: Q-.YYYY.-.####
+
+  [x] After-install hook: setup.after_install
+
+NOT DONE / PENDING:
+  [ ] setup.after_install not found in file listing — may be missing
+  [ ] Grid spreadsheet-mode (static_rows) is commented out in JS
+        — "setup_items_grid disabled — custom fields not active"
+  [ ] No git version control
+  [ ] No tests written
+
+
+===========================================================
+APP 2: quotation_enhancer
+===========================================================
+Purpose: Enhance standard ERPNext Quotation with 3 features
+
+DONE:
+  [x] Feature 1 — Inline Item Creation:
+        When an item_code is typed that doesn't exist, a dialog pops up
+        to create the item on the fly (name, group, description, rate, stock)
+        and adds it directly to the quotation row.
+
+  [x] Feature 2A — Quotation Templates:
+        - Custom DocType: Quotation Template (with Quotation Template Item child)
+        - "Load from Template" button in Tools menu:
+            selects template → populates customer, currency, price_list, items
+        - "Save as Template" button in Tools menu:
+            saves current quotation items as a named reusable template
+
+  [x] Feature 2B — Auto-save draft to localStorage:
+        - On new quotation: saves party_name + items every 30 seconds
+        - On next new quotation: prompts to restore last draft
+        - Clears on save or user decline
+
+  [x] Feature 3 — Sales Search page:
+        - Custom Frappe Page: "sales-search"
+        - Searches Quotation, Sales Order, Sales Invoice simultaneously
+        - Debounced input (400ms), spinner, results table per doctype
+        - Clickable rows navigate to document
+        - Backend: search_sales_docs() — searches by customer_name + doc name/ID
+        - "Sales Search" shortcut button added to Quotation Tools menu
+
+  [x] CSS fix (form_fix.css):
+        - Frappe v15 read-mode field invisible text bug fixed
+        - input/textarea background forced to #f0f0f0 with visible text color
+
+  [x] Post-install setup (setup/install.py): runs after app install
+
+NOT DONE / PENDING:
+  [ ] Sales Search only searches by customer_name and doc name
+        — does NOT search by enquiry_no, drawing_no, do_no, subject, note
+        — (these are fabrication_erp custom fields, integration incomplete)
+  [ ] No git version control
+  [ ] No tests
+
+
+===========================================================
+APP 3: custom_jobs
+===========================================================
+Purpose: Service Job Card management
+
+DONE:
+  [x] App scaffolded with bench new-app
+  [x] Custom DocType: Service Job Card
+        Fields: job_no, job_date, oo_type, customer_name, contact_person,
+                telephone, fax, mobile, email_id, items (child table)
+  [x] Custom DocType: Service Job Card Items (child table)
+  [x] Workspace: Custom Jobs workspace JSON created
+  [x] Installed on site1.local
+
+NOT DONE / PENDING:
+  [ ] All files are UNTRACKED in git (never committed beyond init)
+  [ ] No JS for the form (no client-side logic)
+  [ ] No print format
+  [ ] No API endpoints
+  [ ] No business logic in Python controller
+  [ ] Service Job Card Items fields not reviewed (may be empty)
+  [ ] Not wired to any workflow
+
+
+===========================================================
+APP 4: quotation_app
+===========================================================
+Purpose: (Originally intended as quotation management — now mostly superseded
+          by fabrication_erp and quotation_enhancer)
+
+DONE:
+  [x] App scaffolded with bench new-app
+  [x] hooks.py modified to inject quotation.js into "Fab Quotation" doctype
+  [x] Print Format HTML created (quotation_print.html) — basic Jinja2 template
+  [x] public/js/quotation.js file exists (content unknown — untracked)
+  [x] Installed on site1.local
+
+NOT DONE / PENDING:
+  [ ] hooks.py changes not committed to git
+  [ ] Print format and JS are untracked
+  [ ] Role/purpose unclear — overlaps with fabrication_erp
+  [ ] No DocTypes of its own
+
+
+===========================================================
+INFRASTRUCTURE / BENCH SETUP
+===========================================================
+
+DONE:
+  [x] Frappe bench initialized at /home/jo/frappe-bench
+  [x] ERPNext v15 installed
+  [x] MariaDB configured, site1.local created
+  [x] Redis cache + queue configured (ports 13000, 11000)
+  [x] Gunicorn web server on port 8000 (25 workers)
+  [x] Socketio on port 9000
+  [x] Developer mode enabled
+  [x] Server scripts enabled
+  [x] Cloudflare Tunnel alias configured:
+        digest-campaign-symbols-segments.trycloudflare.com → site1.local
+  [x] All 4 custom apps installed on site1.local in correct order:
+        frappe → fabrication_erp → quotation_enhancer →
+        erpnext → custom_jobs → quotation_app
+
+NOT DONE / PENDING:
+  [ ] Production deployment (still running dev server)
+  [ ] Backup strategy not configured
+  [ ] fabrication_erp and quotation_enhancer not in git
+  [ ] Supervisor/systemd not set up for auto-start
+
+
+===========================================================
+OVERALL STATUS SUMMARY
+===========================================================
+
+  Component               Status          Notes
+  ─────────────────────── ──────────────  ─────────────────────────────────
+  fabrication_erp         DONE            Core business app, fully working
+  quotation_enhancer      DONE            All 3 features implemented
+  custom_jobs             INCOMPLETE      Scaffolded only, no logic/UI
+  quotation_app           INCOMPLETE      Scaffolded, role unclear
+  Bench / Infrastructure  DONE            Dev server running fine
+  Version Control         PARTIAL         Only custom_jobs + quotation_app
+                                          have git; fabrication_erp and
+                                          quotation_enhancer have NO git repo
+  Tests                   NOT DONE        No tests written anywhere
+  Production Deploy       NOT DONE        Still on dev server
+
+===========================================================

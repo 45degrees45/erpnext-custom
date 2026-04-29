@@ -1,0 +1,73 @@
+ASMI Quotation Description Inline Edit Fix Notes
+Date: 2026-03-22
+
+Issue Reported
+- In ASMI -> ASMI Quotation -> New ASMI Quotation, clicking Description opened the row popup (Edit Row) instead of editing directly inline.
+
+What Was Done
+1) Brought ERPNext up and verified access
+- Bench found at: /home/jo/frappe-bench
+- ERPNext/Frappe versions confirmed:
+  - erpnext 15.101.0
+  - frappe 15.102.0
+- Started bench services and verified HTTP 200 on localhost:8000.
+
+2) Initial client-side inline-edit enforcement
+- File updated:
+  /home/jo/frappe-bench/apps/asmi/asmi/asmi/doctype/asmi_quotation/asmi_quotation.js
+- Added/updated grid behavior to force inline editing for items table:
+  - grid in_place_edit enabled
+  - description in list view
+  - description fieldtype forced to Data
+  - additional stricter inline-grid enforcement logic added in setup/onload/refresh
+- Rebuilt and cleared cache.
+
+3) Root-cause investigation in live DB metadata
+- Checked Client Script and Property Setter records for:
+  - ASMI Quotation
+  - ASMI Quotation Item
+- Found no DB-level override causing this issue.
+
+4) Root cause identified
+- In tabDocField for ASMI Quotation Item, all item fields had columns = 0.
+- In Frappe v15 this can cause grid rows to fall back to Edit Row popup behavior.
+
+5) Permanent metadata fix in app Doctype JSON
+- File updated:
+  /home/jo/frappe-bench/apps/asmi/asmi/asmi/doctype/asmi_quotation_item/asmi_quotation_item.json
+- Added explicit columns:
+  - description: 4
+  - unit: 2
+  - quantity: 1
+  - price: 2
+  - amount: 1
+
+6) Applied to site1.local first
+- Ran:
+  - bench --site site1.local migrate
+  - bench build --app asmi
+  - bench --site site1.local clear-cache
+  - bench --site site1.local clear-website-cache
+- Verified DB columns updated on site1.local.
+
+7) Applied to active localhost site (vanilla.local)
+- Discovered localhost default site:
+  - sites/common_site_config.json had default_site = vanilla.local and serve_default_site = true
+- vanilla.local still had columns = 0 initially.
+- Ran:
+  - bench --site vanilla.local migrate
+  - bench --site vanilla.local clear-cache
+  - bench --site vanilla.local clear-website-cache
+- Verified DB columns updated on vanilla.local.
+
+Outcome
+- Inline editing now works for Description in New ASMI Quotation on localhost URL.
+- User confirmed: "Working".
+
+Files Changed
+1) /home/jo/frappe-bench/apps/asmi/asmi/asmi/doctype/asmi_quotation/asmi_quotation.js
+2) /home/jo/frappe-bench/apps/asmi/asmi/asmi/doctype/asmi_quotation_item/asmi_quotation_item.json
+
+Operational Note
+- If similar issue appears again, first confirm active site behind localhost and check:
+  SELECT fieldname, columns, in_list_view FROM tabDocField WHERE parent='ASMI Quotation Item';
